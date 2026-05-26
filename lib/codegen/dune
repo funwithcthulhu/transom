@@ -1,0 +1,4 @@
+(library
+ (name transom_codegen)
+ (public_name transom.codegen)
+ (libraries yojson unix))

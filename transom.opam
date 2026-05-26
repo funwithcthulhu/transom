@@ -1,0 +1,19 @@
+opam-version: "2.0"
+synopsis: "OCaml sidecar glue for Tauri-style desktop apps"
+description: "Transom connects a Tauri/webview frontend to an OCaml sidecar over newline-delimited JSON."
+maintainer: "funwithcthulhu"
+authors: ["funwithcthulhu"]
+license: "MIT"
+homepage: "https://github.com/funwithcthulhu/transom"
+bug-reports: "https://github.com/funwithcthulhu/transom/issues"
+dev-repo: "git+https://github.com/funwithcthulhu/transom.git"
+depends: [
+  "ocaml" {>= "5.1"}
+  "dune" {>= "3.11"}
+  "cmdliner"
+  "yojson"
+]
+build: [
+  ["dune" "subst"] {dev}
+  ["dune" "build" "-p" name "-j" jobs]
+]

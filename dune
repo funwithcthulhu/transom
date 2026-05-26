@@ -1,0 +1,17 @@
+(data_only_dirs templates)
+
+(install
+ (section share)
+ (package transom)
+ (files
+  (templates/minimal/backend/dune-project as templates/minimal/backend/dune-project)
+  (templates/minimal/backend/transom.json as templates/minimal/backend/transom.json)
+  (templates/minimal/backend/api.atd as templates/minimal/backend/api.atd)
+  (templates/minimal/backend/bin/dune as templates/minimal/backend/bin/dune)
+  (templates/minimal/backend/bin/main.ml as templates/minimal/backend/bin/main.ml)
+  (templates/minimal/frontend/package.json as templates/minimal/frontend/package.json)
+  (templates/minimal/frontend/index.html as templates/minimal/frontend/index.html)
+  (templates/minimal/frontend/src/main.ts as templates/minimal/frontend/src/main.ts)
+  (templates/minimal/src-tauri/Cargo.toml as templates/minimal/src-tauri/Cargo.toml)
+  (templates/minimal/src-tauri/tauri.conf.json as templates/minimal/src-tauri/tauri.conf.json)
+  (templates/minimal/src-tauri/src/main.rs as templates/minimal/src-tauri/src/main.rs)))

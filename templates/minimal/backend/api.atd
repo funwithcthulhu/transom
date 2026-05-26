@@ -1,0 +1,19 @@
+type ping_req = {
+  message : string
+}
+
+type ping_res = {
+  message : string
+}
+
+type count_req = {
+  upto : int
+}
+
+type count_res = {
+  total : int
+}
+
+type count_event = {
+  value : int
+}

@@ -1,0 +1,24 @@
+{
+  "service_module": "Api_server",
+  "types_module": "Api_t",
+  "json_module": "Api_j",
+  "typescript_types_module": "./api_types",
+  "commands": [
+    {
+      "name": "ping",
+      "request": "ping_req",
+      "response": "ping_res",
+      "ts_request": "PingReq",
+      "ts_response": "PingRes"
+    },
+    {
+      "name": "count",
+      "request": "count_req",
+      "response": "count_res",
+      "event": "count_event",
+      "ts_request": "CountReq",
+      "ts_response": "CountRes",
+      "ts_event": "CountEvent"
+    }
+  ]
+}

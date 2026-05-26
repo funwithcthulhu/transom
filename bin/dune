@@ -1,0 +1,4 @@
+(executable
+ (name main)
+ (public_name transom)
+ (libraries cmdliner transom.runtime transom.codegen unix))

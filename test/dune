@@ -1,0 +1,8 @@
+(tests
+ (names test_protocol test_manifest test_codegen)
+ (deps fixtures/transom.json)
+ (libraries transom.runtime transom.codegen unix yojson))
+
+(rule
+ (alias runtest)
+ (action (run %{exe:../bin/main.exe} check --manifest %{dep:fixtures/transom.json})))
