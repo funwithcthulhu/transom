@@ -34,7 +34,7 @@ let interface manifest =
     "\n"
     (handlers_module_type manifest
      @ [ ""
-       ; "module Make (H : HANDLERS) : sig"
+       ; "module Make (_ : HANDLERS) : sig"
        ]
      @ dispatch_signature
      @ [ "end"; "" ])

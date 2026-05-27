@@ -1,10 +1,10 @@
 module {{module_name}} =
   Api_server.Make
     (struct
-      let ping req =
-        Ok { Api_t.message = "pong: " ^ req.Api_t.message }
+      let ping (req : Api_t.ping_req) =
+        Ok ({ Api_t.message = "pong: " ^ req.Api_t.message } : Api_t.ping_res)
 
-      let count req ~emit =
+      let count (req : Api_t.count_req) ~emit =
         let rec loop value total =
           if value > req.Api_t.upto then
             total

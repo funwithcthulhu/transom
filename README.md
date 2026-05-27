@@ -30,6 +30,7 @@ cd hello/backend
 Generate ATD codecs and Transom glue:
 
 ```sh
+opam install atdgen
 atdgen -t -o bin/api api.atd
 atdgen -j -o bin/api api.atd
 transom gen --manifest transom.json --out bin
