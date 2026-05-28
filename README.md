@@ -1,8 +1,35 @@
 # Transom
 
-Transom helps connect a Tauri/webview frontend to an OCaml native sidecar over newline-delimited JSON.
+Transom is a toolkit for building desktop WebView apps with OCaml backend/application logic, typed IPC, and modern web frontends.
 
-The v0.1 scope is small: a runtime protocol library, a manifest-driven code generator, a CLI, and one minimal project template. Users bring their own ATD files and ATD-generated JSON codecs.
+The project is early. The current `v0.1.0` release establishes protocol, code generation, CLI, and template foundations. It does not yet provide production-ready Tauri sidecar integration or a complete end-to-end desktop app workflow.
+
+## Who It Is For
+
+Transom is for developers who want a desktop app with a normal web UI, but want serious backend/application logic in native OCaml instead of Rust, Node, Python, or shell scripts.
+
+Good fits include compiler playgrounds, static-analysis GUIs, file indexers, log viewers, local-first search tools, database/admin tools, research tools, and apps with parsers, analyzers, typed domain models, or complex local workflows.
+
+## What It Solves
+
+Modern WebView apps have a useful split: a web frontend for UI, a desktop shell for windows and packaging, and backend/application logic for local work. Tauri normally puts much of that local logic in Rust.
+
+Transom keeps the web frontend path open while making OCaml the backend/application-logic layer. The boundary is generated typed IPC between frontend code and a native OCaml sidecar.
+
+## v0.1.0 Scope
+
+The initial release provides:
+
+- runtime protocol types;
+- structured errors;
+- a newline-delimited JSON stdio loop;
+- a JSON manifest parser;
+- generated OCaml server glue;
+- generated TypeScript client glue;
+- CLI commands;
+- one minimal project template.
+
+The template is intentionally plain. Users bring their own ATD files and ATD-generated JSON codecs.
 
 ## Install From Source
 
@@ -18,7 +45,7 @@ During development, run the CLI without installing it:
 dune exec transom -- version
 ```
 
-## Quickstart
+## v0.1.0 Quickstart
 
 Create a project from the minimal template:
 
@@ -37,11 +64,23 @@ transom gen --manifest transom.json --out bin
 dune build
 ```
 
-The template is intentionally plain. It does not run npm, Cargo, opam, or Dune for you.
+The current CLI does not run npm, Cargo, opam, or Dune for you.
+
+## Intended Future Flow
+
+This is the direction, not the current `v0.1.0` CLI:
+
+```sh
+opam install transom
+transom new myapp --host tauri --ui typescript --backend ocaml
+cd myapp
+npm install
+npm run tauri dev
+```
 
 ## Manifest
 
-Transom uses JSON for v0.1:
+Transom uses JSON for v0.x:
 
 ```json
 {
@@ -67,9 +106,7 @@ The generator writes:
 transom gen --manifest transom.json --out generated
 ```
 
-This creates `api_server.mli`, `api_server.ml`, and `api_client.ts`.
-
-Names in the manifest are generated directly into OCaml and TypeScript. `transom check` rejects names that are not valid identifiers for the generated code.
+This creates `api_server.mli`, `api_server.ml`, and `api_client.ts`. Names in the manifest are generated directly into OCaml and TypeScript, so `transom check` rejects names that are not valid identifiers for the generated code.
 
 ## CLI
 
@@ -82,12 +119,8 @@ transom gen --manifest transom.json --out generated
 transom new NAME --template minimal
 ```
 
-`transom paths` prints template search paths in order:
+## What Transom Is Not
 
-1. `TRANSOM_TEMPLATE_DIR`
-2. `./templates`
-3. `$OPAM_SWITCH_PREFIX/share/transom/templates`
+Transom is not an OCaml frontend/UI framework, a native GUI toolkit, a custom renderer, a WebView implementation, a full Tauri wrapper, or a Tauri replacement. It is not trying to replace Rust inside Tauri. It is not npm-first, TypeScript-only, or an attempt to hide every non-OCaml tool.
 
-## Not In v0.1
-
-Transom v0.1 does not implement a Tauri replacement, native GUI toolkit, schema language, webview host, async runtime integration, plugin system, npm package, or Cargo crate. It also does not parse `.atd` files. ATD codecs are supplied by the user.
+See [PROJECT.md](PROJECT.md), [ROADMAP.md](ROADMAP.md), and [NON_GOALS.md](NON_GOALS.md) for the project direction.
