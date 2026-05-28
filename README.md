@@ -2,7 +2,9 @@
 
 Transom is a toolkit for building desktop WebView apps with OCaml backend/application logic, typed IPC, and modern web frontends.
 
-The project is early. The current `v0.1.0` release establishes protocol, code generation, CLI, and template foundations. It does not yet provide production-ready Tauri sidecar integration or a complete end-to-end desktop app workflow.
+The project is early. The `v0.1.0` release established the protocol, code generation, CLI, and template foundation. This branch is the v0.2 work-in-progress: a plain TypeScript Tauri UI calling a native OCaml sidecar over newline-delimited JSON.
+
+The v0.2 template is a development proof, not production packaging.
 
 ## Who It Is For
 
@@ -16,9 +18,9 @@ Modern WebView apps have a useful split: a web frontend for UI, a desktop shell 
 
 Transom keeps the web frontend path open while making OCaml the backend/application-logic layer. The boundary is generated typed IPC between frontend code and a native OCaml sidecar.
 
-## v0.1.0 Scope
+## Current Status
 
-The initial release provides:
+The codebase currently provides:
 
 - runtime protocol types;
 - structured errors;
@@ -27,13 +29,10 @@ The initial release provides:
 - generated OCaml server glue;
 - generated TypeScript client glue;
 - CLI commands;
-- one minimal project template.
+- one minimal project template;
+- a basic Tauri command that calls the OCaml sidecar for request/response IPC.
 
-The template is intentionally plain. Users bring their own ATD files and ATD-generated JSON codecs.
-
-The `features/0.2.0-wip` branch is starting the next proof: a plain TypeScript
-Tauri UI calling a native OCaml sidecar through newline-delimited JSON. It is a
-manual development smoke path, not production packaging.
+The template is intentionally plain. Users bring their own ATD files and ATD-generated JSON codecs. Streaming, cancellation, and production sidecar packaging are still future work.
 
 ## Install From Source
 
@@ -49,7 +48,7 @@ During development, run the CLI without installing it:
 dune exec transom -- version
 ```
 
-## v0.1.0 Quickstart
+## Backend Glue
 
 Create a project from the minimal template:
 
