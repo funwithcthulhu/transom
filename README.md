@@ -8,13 +8,13 @@ The v0.2 template is a development proof, not production packaging.
 
 ## Who It Is For
 
-Transom is for developers who want a desktop app with a normal web UI, but want serious backend/application logic in native OCaml instead of Rust, Node, Python, or shell scripts.
+Transom is for developers who want a desktop app with a web UI, but want backend/application logic in native OCaml instead of Rust, Node, Python, or shell scripts.
 
 Good fits include compiler playgrounds, static-analysis GUIs, file indexers, log viewers, local-first search tools, database/admin tools, research tools, and apps with parsers, analyzers, typed domain models, or complex local workflows.
 
 ## What It Solves
 
-Modern WebView apps have a useful split: a web frontend for UI, a desktop shell for windows and packaging, and backend/application logic for local work. Tauri normally puts much of that local logic in Rust.
+A WebView desktop app usually separates frontend/UI, host/shell, and local application logic. Tauri normally puts much of that local logic in Rust.
 
 Transom keeps the web frontend path open while making OCaml the backend/application-logic layer. The boundary is generated typed IPC between frontend code and a native OCaml sidecar.
 
@@ -48,31 +48,9 @@ During development, run the CLI without installing it:
 dune exec transom -- version
 ```
 
-## Backend Glue
-
-Create a project from the minimal template:
-
-```sh
-transom new hello
-cd hello/backend
-```
-
-Generate ATD codecs and Transom glue:
-
-```sh
-opam install atdgen
-atdgen -t -o bin/api api.atd
-atdgen -j -o bin/api api.atd
-transom gen --manifest transom.json --out bin
-dune build
-```
-
-The current CLI does not run npm, Cargo, opam, or Dune for you.
-
 ## Intended v0.2 Smoke Test
 
-On the feature branch, the minimal template includes a basic Tauri command that
-talks to a persistent OCaml sidecar process. Generate the app and backend first:
+On the feature branch, the minimal template includes a basic Tauri command that talks to a persistent OCaml sidecar process. Generate the app and backend first:
 
 ```sh
 transom new hello-transom
@@ -114,14 +92,12 @@ npm install --prefix frontend
 npm --prefix frontend run dev
 ```
 
-The frontend has a Ping button. A successful click should show the response from
-the OCaml handler. The Rust bridge is request/response only. `TRANSOM_SIDECAR`
-is a development path to the built backend executable. Cross-platform sidecar
-naming, production bundling, streaming, and cancellation are not complete yet.
+The frontend has a Ping button. A successful click should show the response from the OCaml handler. The Rust bridge is request/response only. `TRANSOM_SIDECAR` is a development path to the built backend executable. Cross-platform sidecar naming, production bundling, streaming, and cancellation are not complete yet.
+The current CLI does not run npm, Cargo, opam, or Dune for you.
 
 ## Manifest
 
-Transom uses JSON for v0.x:
+Transom uses JSON for v0.x. A minimal manifest looks like this:
 
 ```json
 {
@@ -141,13 +117,7 @@ Transom uses JSON for v0.x:
 }
 ```
 
-The generator writes:
-
-```sh
-transom gen --manifest transom.json --out generated
-```
-
-This creates `api_server.mli`, `api_server.ml`, and `api_client.ts`. Names in the manifest are generated directly into OCaml and TypeScript, so `transom check` rejects names that are not valid identifiers for the generated code.
+`transom gen --manifest transom.json --out generated` creates `api_server.mli`, `api_server.ml`, and `api_client.ts`. Names in the manifest are generated directly into OCaml and TypeScript, so `transom check` rejects names that are not valid identifiers for the generated code.
 
 ## CLI
 

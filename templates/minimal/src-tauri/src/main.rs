@@ -136,7 +136,7 @@ fn spawn_sidecar() -> Result<SidecarProcess, String> {
     let mut child = Command::new(&path)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stderr(Stdio::inherit())
         .spawn()
         .map_err(|err| format!("failed to start OCaml sidecar: {}", err))?;
 
@@ -193,7 +193,9 @@ fn read_response(process: &mut SidecarProcess, request_id: u64) -> Result<Value,
                 check_response_id(&frame, request_id)?;
                 return Err(BridgeError::keep(frame_error(&frame)));
             }
-            Some("event") => {}
+            Some("event") => {
+                check_response_id(&frame, request_id)?;
+            }
             Some(kind) => {
                 return Err(BridgeError::reset(format!(
                     "unexpected sidecar frame: {}",

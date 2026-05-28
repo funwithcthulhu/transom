@@ -52,7 +52,7 @@ Excluded:
 
 ## v0.3: Typed IPC Hardening
 
-Purpose: make the frontend/OCaml boundary safe, generated, and pleasant.
+Purpose: make the frontend/OCaml boundary typed, generated, and easier to inspect.
 
 Scope:
 
@@ -97,11 +97,11 @@ Excluded:
 - custom scheduler;
 - binary IPC.
 
-## v0.5: Useful Desktop App Template
+## v0.5: Non-Trivial Desktop App Template
 
 Purpose: move beyond toy examples.
 
-Scope: build one serious flagship example:
+Scope: build one representative example app:
 
 - file indexer;
 - log viewer;
@@ -116,7 +116,7 @@ The example must use:
 - typed IPC;
 - long-running operation;
 - progress events;
-- useful error handling.
+- visible structured errors.
 
 Excluded:
 
@@ -154,7 +154,7 @@ Scope:
 - typed IPC/codegen;
 - structured errors;
 - streaming/cancellation if mature;
-- at least one polished real example app;
+- at least one maintained example app with documented build/run steps;
 - documented upgrade policy;
 - clear non-goals;
 - clear host adapter architecture.
@@ -168,4 +168,4 @@ Scope:
 - Neutralino adapter;
 - direct WebView adapter;
 - Melange/js_of_ocaml optional frontend path;
-- richer host API helpers.
+- additional host API helpers.

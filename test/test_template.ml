@@ -39,10 +39,12 @@ let () =
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "fn transom_call";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "Mutex<Sidecar>";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "TRANSOM_SIDECAR";
+  assert_contains "../templates/minimal/src-tauri/src/main.rs" "stderr(Stdio::inherit())";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "\"kind\": \"call\"";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "read_line";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "Some(\"ok\")";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "Some(\"err\")";
+  assert_contains "../templates/minimal/src-tauri/src/main.rs" "Some(\"event\")";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" ".manage(Mutex::new(Sidecar::new()))";
   assert_contains "../dune" "templates/minimal/frontend/tsconfig.json";
   assert_contains "../dune" "templates/minimal/frontend/src/api_types.ts"

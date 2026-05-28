@@ -6,11 +6,11 @@ Status: Accepted
 
 Desktop WebView apps separate shell, frontend, and backend/application logic. The shell owns windows and packaging. The frontend owns UI. Backend/application logic owns local work, domain rules, parsing, analysis, and data processing.
 
-Tauri's usual model uses a WebView frontend and Rust-side shell/backend logic. That is a practical default, but it is not the only useful split.
+Tauri's usual model uses a WebView frontend and Rust-side shell/backend logic. That is one workable split, but not the only one.
 
 OCaml is strong for backend/application logic, compilers, analyzers, parsers, local tools, and type-heavy domains. Current OCaml-native desktop UI libraries are not the foundation Transom wants to build on. Web frontend ecosystems are better for UI breadth and component availability.
 
-The missing piece is an ergonomic OCaml backend/application-logic path inside desktop WebView apps.
+The missing piece is a maintained OCaml backend/application-logic path inside desktop WebView apps.
 
 ## Decision
 
@@ -28,9 +28,9 @@ Positive:
 
 - avoids building a native GUI toolkit;
 - avoids forcing users into weak OCaml UI libraries;
-- lets users use mature web frontend stacks;
-- gives OCaml a clear role where it is strong;
-- makes serious local desktop tools easier to build in OCaml;
+- keeps existing web frontend frameworks available;
+- uses OCaml for backend/application logic;
+- supports local desktop tools with parsers, analyzers, and typed domain logic;
 - keeps future host adapters possible.
 
 Negative:

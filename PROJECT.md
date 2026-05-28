@@ -4,13 +4,13 @@
 
 OCaml is strong for backend/application logic: parsers, compilers, analyzers, static-analysis tools, local data processing, typed domain models, and complex local workflows.
 
-Modern desktop UI is usually better served by WebView and web frontend ecosystems than by current OCaml-native GUI libraries. The web ecosystem has more mature layout, styling, accessibility, and component options.
+Desktop UI is usually better served by WebView and web frontend ecosystems than by current OCaml-native GUI libraries. The web ecosystem has broader layout, styling, accessibility, and component options.
 
-Tauri's normal model gives users a WebView frontend and Rust-side shell/backend logic. That works well for many apps, but it leaves OCaml developers without an ergonomic path for using native OCaml as the backend/application-logic layer inside desktop WebView apps.
+Tauri's normal model gives users a WebView frontend and Rust-side shell/backend logic. That works well for many apps, but it leaves OCaml developers without a maintained path for using native OCaml as the backend/application-logic layer inside desktop WebView apps.
 
 ## Solution
 
-Transom lets the UI use the best available web frontend stack while backend/application logic is written in OCaml.
+Transom lets the UI use existing web frontend tools while backend/application logic is written in OCaml.
 
 The frontend and OCaml sidecar communicate through generated typed IPC. Transom starts with Tauri because Tauri provides a practical WebView desktop shell and sidecar packaging path.
 
@@ -72,7 +72,7 @@ Transom should not own:
 
 The goal is not "complete Tauri integration."
 
-The goal is "complete enough Tauri integration to make OCaml sidecar backends ergonomic in Tauri desktop apps."
+The goal is "enough Tauri integration for OCaml sidecar backends to work in Tauri desktop apps."
 
 This means Transom should support:
 
@@ -102,4 +102,4 @@ Transom should not require users to write frontend code in OCaml. OCaml-authored
 
 ## Long-Term Identity
 
-Transom's durable value is making OCaml a first-class backend/application-logic language for desktop WebView apps.
+Transom's long-term role is making OCaml a supported backend/application-logic language for desktop WebView apps.

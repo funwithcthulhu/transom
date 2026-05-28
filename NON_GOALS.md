@@ -1,6 +1,6 @@
 # Non-Goals
 
-Transom's value comes from a narrow role: making OCaml a first-class backend/application-logic language for desktop WebView apps.
+Transom has a narrow role: using OCaml for backend/application logic in desktop WebView apps.
 
 ## Boundaries
 
@@ -22,12 +22,12 @@ Transom is not:
 
 ## Why Not OCaml Frontend First?
 
-OCaml-authored frontends may be useful later, but the immediate ecosystem gap is different: allowing developers to use mature web UI stacks while writing backend/application logic in OCaml.
+OCaml-authored frontends may be useful later, but the immediate ecosystem gap is different: allowing developers to use existing web UI tools while writing backend/application logic in OCaml.
 
-Making OCaml frontend authoring the default would reintroduce the same UI-library limitations that Transom is meant to avoid. Transom should let the UI use web tools while giving OCaml a clear role where it is strong.
+Making OCaml frontend authoring the default would reintroduce the same UI-library limitations that Transom is meant to avoid. Transom should keep OCaml on backend/application logic unless a project explicitly chooses otherwise.
 
 ## Tauri Boundary
 
-Tauri is the first host because it is a practical desktop WebView shell with a sidecar packaging path. Transom should support that workflow deeply enough for OCaml sidecars to be ergonomic.
+Tauri is the first host because it has a desktop WebView shell and a sidecar packaging path. Transom should support that workflow enough for the OCaml sidecar path to be usable.
 
 That does not mean Transom should wrap every Tauri API, replace the Tauri CLI, own Tauri permissions, replace Tauri plugins, or abstract every host feature.
