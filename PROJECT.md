@@ -48,8 +48,8 @@ Transom should own:
 - generated OCaml server glue;
 - generated frontend client glue;
 - structured errors;
-- streaming progress/events;
-- cancellation protocol;
+- streaming progress/events eventually;
+- cancellation protocol eventually;
 - sidecar packaging conventions;
 - dev/check/doctor commands;
 - real example apps.
@@ -74,15 +74,15 @@ The goal is not "complete Tauri integration."
 
 The goal is "complete enough Tauri integration to make OCaml sidecar backends ergonomic in Tauri desktop apps."
 
-This means Transom should deeply support:
+This means Transom should support:
 
 - sidecar setup;
 - generated bridge code;
 - frontend-to-OCaml calls;
-- OCaml-to-frontend events;
+- OCaml-to-frontend events eventually;
 - structured errors;
-- streaming progress;
-- cancellation;
+- streaming progress eventually;
+- cancellation eventually;
 - dev workflow;
 - packaging sanity checks.
 
@@ -98,7 +98,7 @@ But Transom should not attempt to:
 
 TypeScript and plain web UI should be the first default path. React, Svelte, Vue, and Solid templates may be added later.
 
-Transom should not require users to write frontend code in OCaml. OCaml-authored frontend support through Melange or js_of_ocaml can be a future optional path, but it is not a current product goal. Do not make OCaml frontend support central in v0.x.
+Transom should not require users to write frontend code in OCaml. OCaml-authored frontend support through Melange or js_of_ocaml can be a future optional path, but it is not a current v0.x priority.
 
 ## Long-Term Identity
 

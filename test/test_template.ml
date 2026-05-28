@@ -33,12 +33,16 @@ let () =
   assert_contains "../templates/minimal/src-tauri/Cargo.toml" "serde_json";
   assert_contains "../templates/minimal/src-tauri/Cargo.toml" "tauri-build";
   assert_contains "../templates/minimal/src-tauri/build.rs" "tauri_build::build";
+  assert (Sys.file_exists "../templates/minimal/src-tauri/icons/icon.ico");
   assert_contains "../templates/minimal/src-tauri/tauri.conf.json" "\"withGlobalTauri\": true";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "#[tauri::command]";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "fn transom_call";
+  assert_contains "../templates/minimal/src-tauri/src/main.rs" "Mutex<Sidecar>";
+  assert_contains "../templates/minimal/src-tauri/src/main.rs" "TRANSOM_SIDECAR";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "\"kind\": \"call\"";
-  assert_contains "../templates/minimal/src-tauri/src/main.rs" "wait_with_output";
+  assert_contains "../templates/minimal/src-tauri/src/main.rs" "read_line";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "Some(\"ok\")";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "Some(\"err\")";
+  assert_contains "../templates/minimal/src-tauri/src/main.rs" ".manage(Mutex::new(Sidecar::new()))";
   assert_contains "../dune" "templates/minimal/frontend/tsconfig.json";
   assert_contains "../dune" "templates/minimal/frontend/src/api_types.ts"

@@ -29,7 +29,7 @@ Excluded:
 
 ## v0.2: Real Tauri + TypeScript UI + OCaml Sidecar Proof
 
-Status: in progress on `features/0.2.0-wip`.
+Status: in progress on the features branch.
 
 Purpose: prove that a desktop WebView app can call native OCaml backend/application logic end-to-end.
 
@@ -47,7 +47,8 @@ Excluded:
 - complete Tauri API bindings;
 - React/Svelte/Vue templates;
 - production release packaging;
-- Electron/Neutralino adapters.
+- Electron/Neutralino adapters;
+- OCaml frontend/UI support.
 
 ## v0.3: Typed IPC Hardening
 
@@ -62,7 +63,7 @@ Scope:
 - request/response calls;
 - protocol tests;
 - generated code readability;
-- basic check command improvements.
+- check command improvements.
 
 Optional:
 

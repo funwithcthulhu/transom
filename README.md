@@ -18,7 +18,7 @@ Modern WebView apps have a useful split: a web frontend for UI, a desktop shell 
 
 Transom keeps the web frontend path open while making OCaml the backend/application-logic layer. The boundary is generated typed IPC between frontend code and a native OCaml sidecar.
 
-## Current Status
+## Current v0.1/v0.2 Status
 
 The codebase currently provides:
 
@@ -30,7 +30,7 @@ The codebase currently provides:
 - generated TypeScript client glue;
 - CLI commands;
 - one minimal project template;
-- a basic Tauri command that calls the OCaml sidecar for request/response IPC.
+- a basic Tauri command that keeps one OCaml sidecar process and calls it for request/response IPC.
 
 The template is intentionally plain. Users bring their own ATD files and ATD-generated JSON codecs. Streaming, cancellation, and production sidecar packaging are still future work.
 
@@ -69,14 +69,14 @@ dune build
 
 The current CLI does not run npm, Cargo, opam, or Dune for you.
 
-## v0.2 Manual Smoke Test
+## Intended v0.2 Smoke Test
 
 On the feature branch, the minimal template includes a basic Tauri command that
-launches the OCaml sidecar for each request. Generate the app and backend first:
+talks to a persistent OCaml sidecar process. Generate the app and backend first:
 
 ```sh
-transom new hello
-cd hello/backend
+transom new hello-transom
+cd hello-transom/backend
 opam install atdgen
 atdgen -t -o bin/api api.atd
 atdgen -j -o bin/api api.atd
@@ -84,27 +84,40 @@ transom gen --manifest transom.json --out bin
 dune build
 ```
 
+You can test the sidecar directly:
+
+```sh
+printf '%s\n' '{"kind":"call","id":1,"method":"ping","params":{"message":"hello"}}' | ./_build/default/bin/main
+```
+
+Expected output is one JSON response frame:
+
+```json
+{"kind":"ok","id":1,"result":{"message":"pong: hello"}}
+```
+
 Then copy the generated TypeScript client and run the Tauri app:
 
 ```sh
 cd ..
 cp backend/bin/api_client.ts frontend/src/api_client.ts
-cd frontend
-npm install
-npm run dev
+TRANSOM_SIDECAR="$PWD/backend/_build/default/bin/main" npm install --prefix frontend
+TRANSOM_SIDECAR="$PWD/backend/_build/default/bin/main" npm --prefix frontend run dev
 ```
 
-In PowerShell, use:
+In PowerShell, use `main.exe`:
 
 ```powershell
 Copy-Item backend\bin\api_client.ts frontend\src\api_client.ts
+$env:TRANSOM_SIDECAR = "$PWD\backend\_build\default\bin\main.exe"
+npm install --prefix frontend
+npm --prefix frontend run dev
 ```
 
 The frontend has a Ping button. A successful click should show the response from
-the OCaml handler. The Rust bridge is request/response only. If it cannot find
-the sidecar, set `TRANSOM_BACKEND` to the built backend executable, for example
-`backend/_build/default/bin/main.exe` on Windows. Cross-platform sidecar naming
-and production packaging are not complete yet.
+the OCaml handler. The Rust bridge is request/response only. `TRANSOM_SIDECAR`
+is a development path to the built backend executable. Cross-platform sidecar
+naming, production bundling, streaming, and cancellation are not complete yet.
 
 ## Manifest
 

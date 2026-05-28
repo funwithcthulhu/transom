@@ -1,4 +1,4 @@
-# ADR 0001: Product Direction
+# ADR 0001: Product direction
 
 Status: Accepted
 
