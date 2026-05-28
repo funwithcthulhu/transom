@@ -69,6 +69,8 @@ transom gen --manifest transom.json --out generated
 
 This creates `api_server.mli`, `api_server.ml`, and `api_client.ts`.
 
+Names in the manifest are generated directly into OCaml and TypeScript. `transom check` rejects names that are not valid identifiers for the generated code.
+
 ## CLI
 
 ```sh
