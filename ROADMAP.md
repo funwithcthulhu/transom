@@ -29,6 +29,8 @@ Excluded:
 
 ## v0.2: Real Tauri + TypeScript UI + OCaml Sidecar Proof
 
+Status: in progress on `features/0.2.0-wip`.
+
 Purpose: prove that a desktop WebView app can call native OCaml backend/application logic end-to-end.
 
 Scope:

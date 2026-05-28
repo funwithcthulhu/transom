@@ -1,6 +1,17 @@
 (tests
- (names test_protocol test_manifest test_codegen)
- (deps fixtures/transom.json)
+ (names test_protocol test_manifest test_codegen test_template)
+ (deps
+  fixtures/transom.json
+  ../dune
+  ../templates/minimal/frontend/index.html
+  ../templates/minimal/frontend/package.json
+  ../templates/minimal/frontend/tsconfig.json
+  ../templates/minimal/frontend/src/api_types.ts
+  ../templates/minimal/frontend/src/main.ts
+  ../templates/minimal/src-tauri/Cargo.toml
+  ../templates/minimal/src-tauri/build.rs
+  ../templates/minimal/src-tauri/tauri.conf.json
+  ../templates/minimal/src-tauri/src/main.rs)
  (libraries transom.runtime transom.codegen unix yojson))
 
 (rule

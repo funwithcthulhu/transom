@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tauri dev",
-    "build": "tsc --noEmit"
+    "build": "tsc",
+    "dev": "npm run build && tauri dev --config ../src-tauri/tauri.conf.json"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.0.0",

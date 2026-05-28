@@ -31,6 +31,10 @@ The initial release provides:
 
 The template is intentionally plain. Users bring their own ATD files and ATD-generated JSON codecs.
 
+The `features/0.2.0-wip` branch is starting the next proof: a plain TypeScript
+Tauri UI calling a native OCaml sidecar through newline-delimited JSON. It is a
+manual development smoke path, not production packaging.
+
 ## Install From Source
 
 ```sh
@@ -66,17 +70,42 @@ dune build
 
 The current CLI does not run npm, Cargo, opam, or Dune for you.
 
-## Intended Future Flow
+## v0.2 Manual Smoke Test
 
-This is the direction, not the current `v0.1.0` CLI:
+On the feature branch, the minimal template includes a basic Tauri command that
+launches the OCaml sidecar for each request. Generate the app and backend first:
 
 ```sh
-opam install transom
-transom new myapp --host tauri --ui typescript --backend ocaml
-cd myapp
-npm install
-npm run tauri dev
+transom new hello
+cd hello/backend
+opam install atdgen
+atdgen -t -o bin/api api.atd
+atdgen -j -o bin/api api.atd
+transom gen --manifest transom.json --out bin
+dune build
 ```
+
+Then copy the generated TypeScript client and run the Tauri app:
+
+```sh
+cd ..
+cp backend/bin/api_client.ts frontend/src/api_client.ts
+cd frontend
+npm install
+npm run dev
+```
+
+In PowerShell, use:
+
+```powershell
+Copy-Item backend\bin\api_client.ts frontend\src\api_client.ts
+```
+
+The frontend has a Ping button. A successful click should show the response from
+the OCaml handler. The Rust bridge is request/response only. If it cannot find
+the sidecar, set `TRANSOM_BACKEND` to the built backend executable, for example
+`backend/_build/default/bin/main.exe` on Windows. Cross-platform sidecar naming
+and production packaging are not complete yet.
 
 ## Manifest
 
