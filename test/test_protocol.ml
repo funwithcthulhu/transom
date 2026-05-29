@@ -13,20 +13,29 @@ let roundtrip_outgoing frame =
 let () =
   roundtrip_incoming
     (Transom_runtime.Protocol.Call
-       { id = 1; method_ = "ping"; params = `Assoc [ "message", `String "hi" ] });
+       {
+         id = 1;
+         method_ = "ping";
+         params = `Assoc [ ("message", `String "hi") ];
+       });
   roundtrip_incoming (Transom_runtime.Protocol.Cancel { id = 1 });
   roundtrip_outgoing
     (Transom_runtime.Protocol.Out_ok
-       { id = 1; result = `Assoc [ "message", `String "pong" ] });
+       { id = 1; result = `Assoc [ ("message", `String "pong") ] });
   roundtrip_outgoing
     (Transom_runtime.Protocol.Out_err
-       { id = Some 1
-       ; error =
-           { Transom_runtime.Error.code = "unknown_method"
-           ; message = "Unknown method: foo"
-           ; data = None
-           }
+       {
+         id = Some 1;
+         error =
+           {
+             Transom_runtime.Error.code = "unknown_method";
+             message = "Unknown method: foo";
+             data = None;
+           };
        });
   roundtrip_outgoing
     (Transom_runtime.Protocol.Out_event
-       { id = 1; event = `Assoc [ "kind", `String "Progress"; "value", `Int 50 ] })
+       {
+         id = 1;
+         event = `Assoc [ ("kind", `String "Progress"); ("value", `Int 50) ];
+       })

@@ -26,10 +26,7 @@ let () =
   assert (contains ts "export async function ping");
   assert (contains ts "export async function count");
   let dirs =
-    Transom_codegen.template_dirs
-      ~cwd:"C:/work/transom"
-      ~env_template_dir:"C:/templates"
-      ~opam_switch_prefix:"C:/opam"
-      ()
+    Transom_codegen.template_dirs ~cwd:"C:/work/transom"
+      ~env_template_dir:"C:/templates" ~opam_switch_prefix:"C:/opam" ()
   in
   assert (List.hd dirs = "C:/templates")
