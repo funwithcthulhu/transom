@@ -1,5 +1,5 @@
 let read_file path =
-  let input = open_in path in
+  let input = open_in_bin path in
   Fun.protect
     ~finally:(fun () -> close_in_noerr input)
     (fun () ->

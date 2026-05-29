@@ -13,7 +13,7 @@ depends: [
   "atdgen"
   "atdgen-runtime"
   "cmdliner"
-  "yojson"
+  "yojson" {>= "2.0.0"}
 ]
 build: [
   ["dune" "subst"] {dev}

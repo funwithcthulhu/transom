@@ -29,6 +29,16 @@ let roundtrip_outgoing frame =
   | Ok parsed -> assert (parsed = frame)
   | Error message -> failwith message
 
+let parsed_incoming json =
+  match Transom_runtime.Protocol.incoming_of_yojson json with
+  | Ok frame -> frame
+  | Error message -> failwith message
+
+let parsed_outgoing json =
+  match Transom_runtime.Protocol.outgoing_of_yojson json with
+  | Ok frame -> frame
+  | Error message -> failwith message
+
 let () =
   roundtrip_incoming
     (Transom_runtime.Protocol.Call
@@ -58,7 +68,64 @@ let () =
          id = 1;
          event = `Assoc [ ("kind", `String "Progress"); ("value", `Int 50) ];
        });
+  (match
+     parsed_incoming
+       (`Assoc
+          [
+            ("kind", `String "call");
+            ("id", `Int 7);
+            ("method", `String "ping");
+            ("params", `Assoc []);
+          ])
+   with
+  | Transom_runtime.Protocol.Call { id = 7; method_ = "ping"; _ } -> ()
+  | _ -> failwith "call frame parsed as a different incoming variant");
+  (match
+     parsed_incoming (`Assoc [ ("kind", `String "cancel"); ("id", `Int 7) ])
+   with
+  | Transom_runtime.Protocol.Cancel { id = 7 } -> ()
+  | _ -> failwith "cancel frame parsed as a different incoming variant");
+  (match
+     parsed_outgoing
+       (`Assoc
+          [
+            ("kind", `String "ok");
+            ("id", `Int 7);
+            ("result", `Assoc [ ("ok", `Bool true) ]);
+          ])
+   with
+  | Transom_runtime.Protocol.Out_ok { id = 7; _ } -> ()
+  | _ -> failwith "ok frame parsed as a different outgoing variant");
+  (match
+     parsed_outgoing
+       (`Assoc
+          [
+            ("kind", `String "err");
+            ("id", `Int 7);
+            ( "error",
+              `Assoc
+                [
+                  ("code", `String "bad_request");
+                  ("message", `String "bad request");
+                ] );
+          ])
+   with
+  | Transom_runtime.Protocol.Out_err { id = Some 7; _ } -> ()
+  | _ -> failwith "err frame parsed as a different outgoing variant");
+  (match
+     parsed_outgoing
+       (`Assoc
+          [
+            ("kind", `String "event");
+            ("id", `Int 7);
+            ("event", `Assoc [ ("value", `Int 1) ]);
+          ])
+   with
+  | Transom_runtime.Protocol.Out_event { id = 7; _ } -> ()
+  | _ -> failwith "event frame parsed as a different outgoing variant");
   expect_incoming_error "unknown incoming frame kind"
+    (`Assoc [ ("kind", `String "wat"); ("id", `Int 1) ]);
+  expect_outgoing_error "unknown outgoing frame kind"
     (`Assoc [ ("kind", `String "wat"); ("id", `Int 1) ]);
   expect_incoming_error "kind must be a string" (`Assoc [ ("kind", `Int 1) ]);
   expect_incoming_error "missing field: id"

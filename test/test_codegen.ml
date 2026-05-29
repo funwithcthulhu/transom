@@ -61,6 +61,29 @@ let duplicate_manifest_json =
 let empty_manifest : Transom_codegen.Manifest.t =
   { custom_manifest with commands = [] }
 
+let expected_custom_ts =
+  String.concat "\n"
+    [
+      "import type * as Api from \"./domain_types\";";
+      "";
+      "export interface TransomTransport {";
+      "  call(method: string, params: unknown): Promise<unknown>;";
+      "  stream?(";
+      "    method: string,";
+      "    params: unknown,";
+      "    onEvent: (event: unknown) => void";
+      "  ): Promise<unknown>;";
+      "}";
+      "";
+      "export async function echo(";
+      "  transport: TransomTransport,";
+      "  req: Api.EchoReq";
+      "): Promise<Api.EchoRes> {";
+      "  return (await transport.call(\"echo\", req)) as Api.EchoRes;";
+      "}";
+      "";
+    ]
+
 let temp_dir prefix =
   let path = Filename.temp_file prefix "" in
   Sys.remove path;
@@ -105,7 +128,7 @@ let () =
   assert (contains custom_ml "Domain_json.echo_req_of_string");
   assert (contains custom_ml "Domain_json.string_of_echo_res");
   assert (contains custom_ml "let _ = emit in");
-  assert (contains custom_ts "import type * as Api from \"./domain_types\";");
+  assert (custom_ts = expected_custom_ts);
   assert (
     List.exists
       (fun (name, _) -> name = "custom_server.ml")

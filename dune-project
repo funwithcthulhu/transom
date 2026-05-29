@@ -14,4 +14,4 @@
   atdgen
   atdgen-runtime
   cmdliner
-  yojson))
+  (yojson (>= 2.0.0))))
