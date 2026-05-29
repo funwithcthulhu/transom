@@ -9,10 +9,32 @@ let contains text needle =
   in
   needle_len = 0 || loop 0
 
+let count_substring text needle =
+  let text_len = String.length text in
+  let needle_len = String.length needle in
+  let rec loop count index =
+    if needle_len = 0 || index + needle_len > text_len then count
+    else if String.sub text index needle_len = needle then
+      loop (count + 1) (index + needle_len)
+    else loop count (index + 1)
+  in
+  loop 0 0
+
 let manifest () =
   match Transom_codegen.Manifest.load_file fixture with
   | Ok manifest -> manifest
   | Error message -> failwith message
+
+let custom_command : Transom_codegen.Manifest.command =
+  {
+    name = "echo";
+    request = "echo_req";
+    response = "echo_res";
+    event = None;
+    ts_request = "EchoReq";
+    ts_response = "EchoRes";
+    ts_event = None;
+  }
 
 let custom_manifest : Transom_codegen.Manifest.t =
   {
@@ -20,19 +42,11 @@ let custom_manifest : Transom_codegen.Manifest.t =
     types_module = "Domain_types";
     json_module = "Domain_json";
     typescript_types_module = "./domain_types";
-    commands =
-      [
-        {
-          name = "echo";
-          request = "echo_req";
-          response = "echo_res";
-          event = None;
-          ts_request = "EchoReq";
-          ts_response = "EchoRes";
-          ts_event = None;
-        };
-      ];
+    commands = [ custom_command ];
   }
+
+let renamed_manifest =
+  { custom_manifest with commands = [ { custom_command with name = "reply" } ] }
 
 let duplicate_manifest_json =
   `Assoc
@@ -84,6 +98,44 @@ let expected_custom_ts =
       "";
     ]
 
+let expected_custom_ml =
+  String.concat "\n"
+    [
+      "module type HANDLERS = sig";
+      "  val echo :";
+      "    Domain_types.echo_req ->";
+      "    (Domain_types.echo_res, Transom_runtime.Error.t) result";
+      "end";
+      "";
+      "module Make (H : HANDLERS) = struct";
+      "  let bad_request method_ exn =";
+      "    Transom_runtime.Error.bad_request";
+      "      (\"Invalid params for \" ^ method_ ^ \": \" ^ Printexc.to_string \
+       exn)";
+      "";
+      "  let dispatch ~method_ ~params ~emit =";
+      "    let _ = emit in";
+      "    match method_ with";
+      "    | \"echo\" ->";
+      "      (match";
+      "         (try Ok";
+      "                (Domain_json.echo_req_of_string (Yojson.Safe.to_string \
+       params))";
+      "          with exn -> Error (bad_request method_ exn))";
+      "       with";
+      "       | Error err -> Error err";
+      "       | Ok req ->";
+      "         match H.echo req with";
+      "         | Ok res -> Ok (Yojson.Safe.from_string \
+       (Domain_json.string_of_echo_res res))";
+      "         | Error err -> Error err)";
+      "    | _ -> Error (Transom_runtime.Error.unknown_method method_)";
+      "";
+      "  let run_stdio () = Transom_runtime.run ~dispatch";
+      "end";
+      "";
+    ]
+
 let temp_dir prefix =
   let path = Filename.temp_file prefix "" in
   Sys.remove path;
@@ -109,6 +161,9 @@ let () =
   let mli = Transom_codegen.Gen_ocaml_server.interface manifest in
   let ml = Transom_codegen.Gen_ocaml_server.implementation manifest in
   let ts = Transom_codegen.Gen_ts_client.implementation manifest in
+  assert (count_substring ml "\n    | \"" = List.length manifest.commands);
+  assert (
+    count_substring ts "export async function" = List.length manifest.commands);
   assert (contains mli "val ping :");
   assert (contains mli "Api_t.ping_req ->");
   assert (contains mli "emit:(Api_t.count_event -> unit) ->");
@@ -124,10 +179,20 @@ let () =
   let custom_ts =
     Transom_codegen.Gen_ts_client.implementation custom_manifest
   in
+  assert (
+    custom_ml = Transom_codegen.Gen_ocaml_server.implementation custom_manifest);
+  assert (
+    custom_ts = Transom_codegen.Gen_ts_client.implementation custom_manifest);
+  assert (
+    custom_ml
+    <> Transom_codegen.Gen_ocaml_server.implementation renamed_manifest);
+  assert (
+    custom_ts <> Transom_codegen.Gen_ts_client.implementation renamed_manifest);
   assert (contains custom_mli "Domain_types.echo_req ->");
   assert (contains custom_ml "Domain_json.echo_req_of_string");
   assert (contains custom_ml "Domain_json.string_of_echo_res");
   assert (contains custom_ml "let _ = emit in");
+  assert (custom_ml = expected_custom_ml);
   assert (custom_ts = expected_custom_ts);
   assert (
     List.exists

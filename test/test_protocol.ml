@@ -40,6 +40,17 @@ let parsed_outgoing json =
   | Error message -> failwith message
 
 let () =
+  let call_params =
+    `Assoc
+      [
+        ("items", `List [ `Int 1; `String "two" ]);
+        ("nested", `Assoc [ ("ok", `Bool true) ]);
+      ]
+  in
+  let ok_result =
+    `Assoc
+      [ ("value", `Float 1.5); ("tags", `List [ `String "a"; `String "b" ]) ]
+  in
   roundtrip_incoming
     (Transom_runtime.Protocol.Call
        {
@@ -68,6 +79,26 @@ let () =
          id = 1;
          event = `Assoc [ ("kind", `String "Progress"); ("value", `Int 50) ];
        });
+  (match
+     parsed_incoming
+       (`Assoc
+          [
+            ("kind", `String "call");
+            ("id", `Int 9);
+            ("method", `String "echo");
+            ("params", call_params);
+          ])
+   with
+  | Transom_runtime.Protocol.Call { id = 9; method_ = "echo"; params } ->
+      assert (params = call_params)
+  | _ -> failwith "call frame did not preserve params");
+  (match
+     parsed_outgoing
+       (`Assoc [ ("kind", `String "ok"); ("id", `Int 9); ("result", ok_result) ])
+   with
+  | Transom_runtime.Protocol.Out_ok { id = 9; result } ->
+      assert (result = ok_result)
+  | _ -> failwith "ok frame did not preserve result");
   (match
      parsed_incoming
        (`Assoc
@@ -127,6 +158,7 @@ let () =
     (`Assoc [ ("kind", `String "wat"); ("id", `Int 1) ]);
   expect_outgoing_error "unknown outgoing frame kind"
     (`Assoc [ ("kind", `String "wat"); ("id", `Int 1) ]);
+  expect_incoming_error "missing field: kind" (`Assoc [ ("id", `Int 1) ]);
   expect_incoming_error "kind must be a string" (`Assoc [ ("kind", `Int 1) ]);
   expect_incoming_error "missing field: id"
     (`Assoc
@@ -139,7 +171,38 @@ let () =
     (`Assoc
        [
          ("kind", `String "call");
+         ("id", `String "7");
+         ("method", `String "ping");
+         ("params", `Assoc []);
+       ]);
+  expect_incoming_error "id must be an integer"
+    (`Assoc
+       [
+         ("kind", `String "call");
+         ("id", `Float 1.0);
+         ("method", `String "ping");
+         ("params", `Assoc []);
+       ]);
+  expect_incoming_error "id must be an integer"
+    (`Assoc
+       [
+         ("kind", `String "call");
          ("id", `Intlit "not-an-int");
+         ("method", `String "ping");
+         ("params", `Assoc []);
+       ]);
+  expect_incoming_error "unknown incoming frame kind: notification"
+    (`Assoc
+       [
+         ("kind", `String "notification");
+         ("method", `String "ping");
+         ("params", `Assoc []);
+       ]);
+  expect_incoming_error "unknown incoming frame kind: notification"
+    (`Assoc
+       [
+         ("kind", `String "notification");
+         ("id", `Int 7);
          ("method", `String "ping");
          ("params", `Assoc []);
        ]);
@@ -161,6 +224,24 @@ let () =
       assert (error.code = "bad_request")
   | Ok _ -> failwith "expected err frame with null id"
   | Error message -> failwith message);
+  (match
+     Transom_runtime.Protocol.outgoing_of_yojson
+       (`Assoc
+          [
+            ("kind", `String "err");
+            ("id", `Int 7);
+            ( "error",
+              `Assoc
+                [
+                  ("code", `String "bad_request");
+                  ("message", `String "bad request");
+                ] );
+          ])
+   with
+  | Ok (Transom_runtime.Protocol.Out_err { id = Some 7; error }) ->
+      assert (error.message = "bad request")
+  | Ok _ -> failwith "expected err frame with integer id"
+  | Error message -> failwith message);
   expect_outgoing_error "missing field: code"
     (`Assoc
        [
@@ -174,4 +255,20 @@ let () =
          ("kind", `String "err");
          ("id", `Null);
          ("error", `Assoc [ ("code", `String "bad_request") ]);
+       ]);
+  expect_outgoing_error "code must be a string"
+    (`Assoc
+       [
+         ("kind", `String "err");
+         ("id", `Null);
+         ( "error",
+           `Assoc [ ("code", `Int 1); ("message", `String "bad request") ] );
+       ]);
+  expect_outgoing_error "message must be a string"
+    (`Assoc
+       [
+         ("kind", `String "err");
+         ("id", `Null);
+         ( "error",
+           `Assoc [ ("code", `String "bad_request"); ("message", `List []) ] );
        ])
