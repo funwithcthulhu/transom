@@ -48,6 +48,14 @@ During development, run the CLI without installing it:
 dune exec transom -- version
 ```
 
+## Development
+
+```sh
+dune build @all
+dune runtest
+dune fmt
+```
+
 ## Intended v0.2 Smoke Test
 
 On the feature branch, the minimal template includes a basic Tauri command that talks to a persistent OCaml sidecar process. Generate the app and backend first:

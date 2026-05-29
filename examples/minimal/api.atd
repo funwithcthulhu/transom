@@ -1,0 +1,7 @@
+type echo_req = {
+  message : string
+}
+
+type echo_res = {
+  reply : string
+}

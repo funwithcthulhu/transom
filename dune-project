@@ -1,5 +1,4 @@
 (lang dune 3.11)
-
 (name transom)
 (version 0.1.0)
 
@@ -12,5 +11,7 @@
  (depends
   (ocaml (>= 5.1))
   (dune (>= 3.11))
+  atdgen
+  atdgen-runtime
   cmdliner
   yojson))

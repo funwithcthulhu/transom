@@ -17,4 +17,5 @@
 
 (rule
  (alias runtest)
- (action (run %{exe:../bin/main.exe} check --manifest %{dep:fixtures/transom.json})))
+ (action
+  (run %{exe:../bin/main.exe} check --manifest %{dep:fixtures/transom.json})))
