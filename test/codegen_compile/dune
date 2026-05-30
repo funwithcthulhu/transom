@@ -1,0 +1,28 @@
+(rule
+ (targets api_t.ml api_t.mli)
+ (deps api.atd)
+ (action
+  (run %{bin:atdgen} -t -o api %{dep:api.atd})))
+
+(rule
+ (targets api_j.ml api_j.mli)
+ (deps api.atd)
+ (action
+  (run %{bin:atdgen} -j -o api %{dep:api.atd})))
+
+(rule
+ (targets api_server.ml api_server.mli api_client.ts)
+ (deps transom.json)
+ (action
+  (run %{exe:../../bin/main.exe} gen --manifest %{dep:transom.json} --out .)))
+
+(executable
+ (name smoke)
+ (modules smoke api_t api_j api_server)
+ (libraries atdgen-runtime transom.runtime yojson))
+
+(rule
+ (alias runtest)
+ (deps smoke.exe)
+ (action
+  (run ./smoke.exe)))
