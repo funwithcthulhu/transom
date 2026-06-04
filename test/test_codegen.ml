@@ -62,12 +62,14 @@ let duplicate_manifest_json =
                 ("name", `String "ping");
                 ("request", `String "ping_req");
                 ("response", `String "ping_res");
+                ("ts_response", `String "PingRes");
               ];
             `Assoc
               [
                 ("name", `String "ping");
                 ("request", `String "other_req");
                 ("response", `String "other_res");
+                ("ts_response", `String "OtherRes");
               ];
           ] );
     ]
@@ -142,6 +144,20 @@ let temp_dir prefix =
   Unix.mkdir path 0o755;
   path
 
+let write_file path content =
+  let output = open_out_bin path in
+  Fun.protect
+    ~finally:(fun () -> close_out_noerr output)
+    (fun () -> output_string output content)
+
+let read_file path =
+  let input = open_in_bin path in
+  Fun.protect
+    ~finally:(fun () -> close_in_noerr input)
+    (fun () ->
+      let length = in_channel_length input in
+      really_input_string input length)
+
 let expect_generate_error_without_files () =
   let dir = temp_dir "transom-codegen" in
   let manifest_file = Filename.concat dir "transom.json" in
@@ -155,6 +171,29 @@ let expect_generate_error_without_files () =
        ^ String.concat ", " files)
   | Error message -> assert (contains message "duplicate command name"));
   assert (Sys.readdir out_dir = [||])
+
+let expect_generate_error_preserves_output () =
+  let dir = temp_dir "transom-codegen" in
+  let manifest_file = Filename.concat dir "transom.json" in
+  let out_dir = Filename.concat dir "out" in
+  let existing_file = Filename.concat out_dir "api_server.ml" in
+  let marker_file = Filename.concat out_dir "keep.txt" in
+  Unix.mkdir out_dir 0o755;
+  Yojson.Safe.to_file manifest_file duplicate_manifest_json;
+  write_file existing_file "existing generated content\n";
+  write_file marker_file "keep me\n";
+  (match Transom_codegen.generate ~manifest_file ~out_dir with
+  | Ok files ->
+      failwith
+        ("expected duplicate command error, generated: "
+       ^ String.concat ", " files)
+  | Error message -> assert (contains message "duplicate command name"));
+  assert (read_file existing_file = "existing generated content\n");
+  assert (read_file marker_file = "keep me\n");
+  assert (
+    Array.to_list (Sys.readdir out_dir)
+    |> List.sort String.compare
+    = [ "api_server.ml"; "keep.txt" ])
 
 let () =
   let manifest = manifest () in
@@ -204,6 +243,7 @@ let () =
   assert (contains empty_ml "let _ = params in");
   assert (contains empty_ml "let _ = emit in");
   expect_generate_error_without_files ();
+  expect_generate_error_preserves_output ();
   let dirs =
     Transom_codegen.template_dirs ~cwd:"C:/work/transom"
       ~env_template_dir:"C:/templates" ~opam_switch_prefix:"C:/opam" ()

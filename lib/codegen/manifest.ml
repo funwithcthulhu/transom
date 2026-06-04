@@ -112,10 +112,18 @@ let validate_optional path expected valid = function
   | None -> Ok ()
   | Some value -> validate_name path expected valid value
 
+let generated_helper_names = [ "bad_request"; "dispatch"; "run_stdio" ]
+
+let validate_command_helper_name path command =
+  if List.mem command.name generated_helper_names then
+    error (path ^ ".name collides with generated helper: " ^ command.name)
+  else Ok ()
+
 let validate_command path command =
   match
     ( validate_name (path ^ ".name") "a lowercase OCaml/TypeScript identifier"
         valid_command_name command.name,
+      validate_command_helper_name path command,
       validate_name (path ^ ".request") "an OCaml type identifier"
         valid_ocaml_type_name command.request,
       validate_name (path ^ ".response") "an OCaml type identifier"
@@ -129,14 +137,15 @@ let validate_command path command =
       validate_optional (path ^ ".ts_event") "a TypeScript type identifier"
         valid_ts_identifier command.ts_event )
   with
-  | Ok (), Ok (), Ok (), Ok (), Ok (), Ok (), Ok () -> Ok command
-  | Error message, _, _, _, _, _, _
-  | _, Error message, _, _, _, _, _
-  | _, _, Error message, _, _, _, _
-  | _, _, _, Error message, _, _, _
-  | _, _, _, _, Error message, _, _
-  | _, _, _, _, _, Error message, _
-  | _, _, _, _, _, _, Error message ->
+  | Ok (), Ok (), Ok (), Ok (), Ok (), Ok (), Ok (), Ok () -> Ok command
+  | Error message, _, _, _, _, _, _, _
+  | _, Error message, _, _, _, _, _, _
+  | _, _, Error message, _, _, _, _, _
+  | _, _, _, Error message, _, _, _, _
+  | _, _, _, _, Error message, _, _, _
+  | _, _, _, _, _, Error message, _, _
+  | _, _, _, _, _, _, Error message, _
+  | _, _, _, _, _, _, _, Error message ->
       error message
 
 let command_of_yojson index json =
@@ -152,7 +161,7 @@ let command_of_yojson index json =
           required "response",
           optional "event",
           optional "ts_request",
-          optional "ts_response",
+          required "ts_response",
           optional "ts_event" )
       with
       | ( Ok name,
@@ -169,7 +178,7 @@ let command_of_yojson index json =
               response;
               event;
               ts_request = Option.value ts_request ~default:request;
-              ts_response = Option.value ts_response ~default:response;
+              ts_response;
               ts_event =
                 (match ts_event with Some _ -> ts_event | None -> event);
             }

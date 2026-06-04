@@ -2,6 +2,11 @@
  (names test_protocol test_manifest test_codegen test_template)
  (deps
   fixtures/transom.json
+  fixtures/manifest_errors/duplicate_command_name.json
+  fixtures/manifest_errors/helper_name_collision.json
+  fixtures/manifest_errors/invalid_ocaml_module_name.json
+  fixtures/manifest_errors/invalid_ts_type_name.json
+  fixtures/manifest_errors/missing_ts_response.json
   ../dune
   ../templates/minimal/frontend/index.html
   ../templates/minimal/frontend/package.json
