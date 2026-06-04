@@ -7,6 +7,10 @@
   fixtures/manifest_errors/invalid_ocaml_module_name.json
   fixtures/manifest_errors/invalid_ts_type_name.json
   fixtures/manifest_errors/missing_ts_response.json
+  fixtures/golden/api_client.ts
+  fixtures/golden/api_server.ml
+  fixtures/golden/api_server.mli
+  fixtures/golden/transom.json
   ../dune
   ../templates/minimal/frontend/index.html
   ../templates/minimal/frontend/package.json

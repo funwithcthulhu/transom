@@ -1,5 +1,11 @@
 let fixture = "fixtures/transom.json"
 
+let golden_fixture =
+  Filename.concat (Filename.concat "fixtures" "golden") "transom.json"
+
+let golden_file name =
+  Filename.concat (Filename.concat "fixtures" "golden") name
+
 let contains text needle =
   let text_len = String.length text in
   let needle_len = String.length needle in
@@ -22,6 +28,11 @@ let count_substring text needle =
 
 let manifest () =
   match Transom_codegen.Manifest.load_file fixture with
+  | Ok manifest -> manifest
+  | Error message -> failwith message
+
+let golden_manifest () =
+  match Transom_codegen.Manifest.load_file golden_fixture with
   | Ok manifest -> manifest
   | Error message -> failwith message
 
@@ -158,6 +169,37 @@ let read_file path =
       let length = in_channel_length input in
       really_input_string input length)
 
+let is_digit = function '0' .. '9' -> true | _ -> false
+
+let contains_iso_date text =
+  let text_len = String.length text in
+  let rec loop index =
+    index + 10 <= text_len
+    && (is_digit text.[index]
+        && is_digit text.[index + 1]
+        && is_digit text.[index + 2]
+        && is_digit text.[index + 3]
+        && text.[index + 4] = '-'
+        && is_digit text.[index + 5]
+        && is_digit text.[index + 6]
+        && text.[index + 7] = '-'
+        && is_digit text.[index + 8]
+        && is_digit text.[index + 9]
+       || loop (index + 1))
+  in
+  loop 0
+
+let assert_portable_output name content =
+  let local_needles =
+    [ Sys.getcwd (); "C:\\"; "\\Users\\"; "/Users/"; "/tmp/"; "\\Temp\\" ]
+  in
+  List.iter
+    (fun needle ->
+      if needle <> "" && contains content needle then
+        failwith (name ^ " contains local path text: " ^ needle))
+    local_needles;
+  assert (not (contains_iso_date content))
+
 let expect_generate_error_without_files () =
   let dir = temp_dir "transom-codegen" in
   let manifest_file = Filename.concat dir "transom.json" in
@@ -194,6 +236,27 @@ let expect_generate_error_preserves_output () =
     Array.to_list (Sys.readdir out_dir)
     |> List.sort String.compare
     = [ "api_server.ml"; "keep.txt" ])
+
+let expect_golden_output () =
+  let generated =
+    Transom_codegen.generated_files (golden_manifest ())
+    |> List.sort (fun (left, _) (right, _) -> String.compare left right)
+  in
+  let expected =
+    [
+      ("api_client.ts", read_file (golden_file "api_client.ts"));
+      ("api_server.ml", read_file (golden_file "api_server.ml"));
+      ("api_server.mli", read_file (golden_file "api_server.mli"));
+    ]
+  in
+  assert (List.map fst generated = List.map fst expected);
+  List.iter2
+    (fun (generated_name, generated_content) (expected_name, expected_content)
+       ->
+      assert (generated_name = expected_name);
+      assert (generated_content = expected_content);
+      assert_portable_output generated_name generated_content)
+    generated expected
 
 let () =
   let manifest = manifest () in
@@ -244,6 +307,7 @@ let () =
   assert (contains empty_ml "let _ = emit in");
   expect_generate_error_without_files ();
   expect_generate_error_preserves_output ();
+  expect_golden_output ();
   let dirs =
     Transom_codegen.template_dirs ~cwd:"C:/work/transom"
       ~env_template_dir:"C:/templates" ~opam_switch_prefix:"C:/opam" ()
