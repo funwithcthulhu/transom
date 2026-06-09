@@ -264,6 +264,13 @@ let contains text needle =
   in
   needle_len = 0 || loop 0
 
+let command_name = Transom_codegen.Manifest.command_name_to_string
+let ocaml_module = Transom_codegen.Manifest.ocaml_module_to_string
+let ocaml_type = Transom_codegen.Manifest.ocaml_type_to_string
+let ts_type = Transom_codegen.Manifest.ts_type_to_string
+let typescript_module = Transom_codegen.Manifest.typescript_module_to_string
+let option_string to_string = Option.map to_string
+
 let expect_manifest_error needle json =
   match Transom_codegen.Manifest.of_yojson json with
   | Ok _ -> failwith ("expected manifest error containing: " ^ needle)
@@ -338,21 +345,21 @@ let expect_cli_manifest_error fixture expected =
 let () =
   (match Transom_codegen.Manifest.load_file fixture with
   | Ok manifest -> (
-      assert (manifest.service_module = "Api_server");
-      assert (manifest.types_module = "Api_t");
-      assert (manifest.json_module = "Api_j");
-      assert (manifest.typescript_types_module = "./api_types");
+      assert (ocaml_module manifest.service_module = "Api_server");
+      assert (ocaml_module manifest.types_module = "Api_t");
+      assert (ocaml_module manifest.json_module = "Api_j");
+      assert (typescript_module manifest.typescript_types_module = "./api_types");
       match manifest.commands with
       | [ ping; count ] ->
-          assert (ping.name = "ping");
-          assert (ping.request = "ping_req");
-          assert (ping.response = "ping_res");
+          assert (command_name ping.name = "ping");
+          assert (ocaml_type ping.request = "ping_req");
+          assert (ocaml_type ping.response = "ping_res");
           assert (ping.event = None);
-          assert (ping.ts_request = "PingReq");
-          assert (ping.ts_response = "PingRes");
-          assert (count.name = "count");
-          assert (count.event = Some "count_event");
-          assert (count.ts_event = Some "CountEvent")
+          assert (ts_type ping.ts_request = "PingReq");
+          assert (ts_type ping.ts_response = "PingRes");
+          assert (command_name count.name = "count");
+          assert (option_string ocaml_type count.event = Some "count_event");
+          assert (option_string ts_type count.ts_event = Some "CountEvent")
       | _ -> failwith "fixture should contain ping and count commands")
   | Error message -> failwith message);
   expect_manifest_error "duplicate command name" duplicate_manifest;
@@ -409,17 +416,18 @@ let () =
   assert ((expect_manifest_ok manifest_with_unknown_field).commands = []);
   assert ((expect_manifest_ok command_with_unknown_field).commands <> []);
   (match expect_manifest_ok manifest_without_optional_fields with
-  | { typescript_types_module = "./api_types"; commands = [ command ]; _ } ->
-      assert (command.ts_request = "watch_req");
-      assert (command.ts_response = "WatchRes");
-      assert (command.ts_event = Some "watch_event")
+  | { typescript_types_module; commands = [ command ]; _ } ->
+      assert (typescript_module typescript_types_module = "./api_types");
+      assert (ts_type command.ts_request = "watch_req");
+      assert (ts_type command.ts_response = "WatchRes");
+      assert (option_string ts_type command.ts_event = Some "watch_event")
   | _ -> failwith "optional manifest fields did not use defaults");
   (match expect_manifest_ok manifest_with_module_paths with
   | { service_module; types_module; json_module; typescript_types_module; _ } ->
-      assert (service_module = "App.Server");
-      assert (types_module = "Domain.Types");
-      assert (json_module = "Domain.Json");
-      assert (typescript_types_module = "../types/api"));
+      assert (ocaml_module service_module = "App.Server");
+      assert (ocaml_module types_module = "Domain.Types");
+      assert (ocaml_module json_module = "Domain.Json");
+      assert (typescript_module typescript_types_module = "../types/api"));
   expect_load_error "invalid JSON" "{";
   expect_cli_manifest_error "missing_ts_response.json"
     "commands[0].ts_response is required";

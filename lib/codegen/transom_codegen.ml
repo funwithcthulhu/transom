@@ -29,7 +29,8 @@ let write_file path content =
 
 let generated_files manifest =
   let server =
-    Gen_ocaml_server.lower_module_filename manifest.Manifest.service_module
+    manifest.Manifest.service_module |> Manifest.ocaml_module_to_string
+    |> Gen_ocaml_server.lower_module_filename
   in
   [
     (server ^ ".mli", Gen_ocaml_server.interface manifest);

@@ -36,28 +36,36 @@ let golden_manifest () =
   | Ok manifest -> manifest
   | Error message -> failwith message
 
-let custom_command : Transom_codegen.Manifest.command =
-  {
-    name = "echo";
-    request = "echo_req";
-    response = "echo_res";
-    event = None;
-    ts_request = "EchoReq";
-    ts_response = "EchoRes";
-    ts_event = None;
-  }
+let manifest_from_json json =
+  match Transom_codegen.Manifest.of_yojson json with
+  | Ok manifest -> manifest
+  | Error message -> failwith message
 
-let custom_manifest : Transom_codegen.Manifest.t =
-  {
-    service_module = "Custom_server";
-    types_module = "Domain_types";
-    json_module = "Domain_json";
-    typescript_types_module = "./domain_types";
-    commands = [ custom_command ];
-  }
+let command_json name =
+  `Assoc
+    [
+      ("name", `String name);
+      ("request", `String "echo_req");
+      ("response", `String "echo_res");
+      ("ts_request", `String "EchoReq");
+      ("ts_response", `String "EchoRes");
+    ]
+
+let custom_manifest_json commands =
+  `Assoc
+    [
+      ("service_module", `String "Custom_server");
+      ("types_module", `String "Domain_types");
+      ("json_module", `String "Domain_json");
+      ("typescript_types_module", `String "./domain_types");
+      ("commands", `List commands);
+    ]
+
+let custom_manifest =
+  manifest_from_json (custom_manifest_json [ command_json "echo" ])
 
 let renamed_manifest =
-  { custom_manifest with commands = [ { custom_command with name = "reply" } ] }
+  manifest_from_json (custom_manifest_json [ command_json "reply" ])
 
 let duplicate_manifest_json =
   `Assoc
@@ -85,8 +93,7 @@ let duplicate_manifest_json =
           ] );
     ]
 
-let empty_manifest : Transom_codegen.Manifest.t =
-  { custom_manifest with commands = [] }
+let empty_manifest = manifest_from_json (custom_manifest_json [])
 
 let expected_custom_ts =
   String.concat "\n"

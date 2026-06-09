@@ -1,21 +1,32 @@
+type command_name = string
+type ocaml_module = string
+type ocaml_type = string
+type ts_type = string
+type typescript_module = string
+
 type command = {
-  name : string;
-  request : string;
-  response : string;
-  event : string option;
-  ts_request : string;
-  ts_response : string;
-  ts_event : string option;
+  name : command_name;
+  request : ocaml_type;
+  response : ocaml_type;
+  event : ocaml_type option;
+  ts_request : ts_type;
+  ts_response : ts_type;
+  ts_event : ts_type option;
 }
 
 type t = {
-  service_module : string;
-  types_module : string;
-  json_module : string;
-  typescript_types_module : string;
+  service_module : ocaml_module;
+  types_module : ocaml_module;
+  json_module : ocaml_module;
+  typescript_types_module : typescript_module;
   commands : command list;
 }
 
+let command_name_to_string value = value
+let ocaml_module_to_string value = value
+let ocaml_type_to_string value = value
+let ts_type_to_string value = value
+let typescript_module_to_string value = value
 let error message = Error message
 
 let assoc path = function
