@@ -1,6 +1,6 @@
 (lang dune 3.11)
 (name transom)
-(version 0.1.0)
+(version 0.2.0)
 
 (generate_opam_files false)
 
@@ -13,5 +13,5 @@
   (dune (>= 3.11))
   atdgen
   atdgen-runtime
-  cmdliner
+  (cmdliner (>= 1.3.0))
   (yojson (>= 2.0.0))))
