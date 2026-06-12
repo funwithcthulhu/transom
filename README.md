@@ -1,5 +1,6 @@
 # Transom
 
+[![CI](https://github.com/funwithcthulhu/transom/actions/workflows/ci.yml/badge.svg)](https://github.com/funwithcthulhu/transom/actions/workflows/ci.yml)
 [![opam](https://badgen.net/opam/v/transom)](https://opam.ocaml.org/packages/transom/)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
