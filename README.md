@@ -1,5 +1,6 @@
 # Transom
 
+[![CI](https://github.com/funwithcthulhu/transom/actions/workflows/ci.yml/badge.svg)](https://github.com/funwithcthulhu/transom/actions/workflows/ci.yml)
 [![opam](https://badgen.net/opam/v/transom)](https://opam.ocaml.org/packages/transom/)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -117,6 +118,12 @@ npm --prefix frontend run dev
 The Rust bridge is request/response only. OS-specific sidecar naming,
 production bundling, streaming, and cancellation are not complete yet. The CLI
 does not run npm, Cargo, opam, or Dune for you.
+
+For the longer local smoke check:
+
+```powershell
+powershell -File scripts/smoke-minimal-template.ps1
+```
 
 ## Manifest
 

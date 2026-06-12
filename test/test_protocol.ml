@@ -319,6 +319,18 @@ let () =
   | _ -> failwith "expected split incoming frame");
   let blank_parser = Transom_runtime.Protocol.create_ndjson_parser () in
   assert (expect_incoming_frames blank_parser "\n\r\n" = []);
+  let bom_parser = Transom_runtime.Protocol.create_ndjson_parser () in
+  (match
+     expect_incoming_frames bom_parser
+       ("\239\187\191"
+      ^ {|{"kind":"call","id":3,"method":"ping","params":{"ok":true}}|} ^ "\n")
+   with
+  | [
+   Transom_runtime.Protocol.Call
+     { id = 3; method_ = "ping"; params = `Assoc [ ("ok", `Bool true) ] };
+  ] ->
+      ()
+  | _ -> failwith "expected BOM-prefixed incoming frame");
   expect_incoming_ndjson_error "invalid JSON frame" "{\n";
   assert (
     Transom_runtime.Protocol.expect_outgoing_id ~id:7

@@ -15,6 +15,7 @@ let dispatch_call dispatch ({ Protocol.id; method_; params } as _call) =
     write_error (Some id) (Error.internal_error message)
 
 let handle_line dispatch line =
+  let line = Protocol.drop_leading_utf8_bom line in
   match Yojson.Safe.from_string line with
   | exception Yojson.Json_error message ->
       write_error None (Error.invalid_json message)
