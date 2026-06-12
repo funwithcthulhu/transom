@@ -119,6 +119,12 @@ The Rust bridge is request/response only. OS-specific sidecar naming,
 production bundling, streaming, and cancellation are not complete yet. The CLI
 does not run npm, Cargo, opam, or Dune for you.
 
+For the longer local smoke check:
+
+```powershell
+powershell -File scripts/smoke-minimal-template.ps1
+```
+
 ## Manifest
 
 Transom uses JSON for v0.x. A minimal manifest looks like this:
