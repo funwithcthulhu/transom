@@ -1,5 +1,8 @@
 # Transom
 
+[![opam](https://badgen.net/opam/v/transom)](https://opam.ocaml.org/packages/transom/)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Transom is a small OCaml runtime and code generator for newline-delimited JSON
 IPC between a TypeScript desktop UI and a native OCaml sidecar. The current
 0.2 branch focuses on a minimal Tauri development proof, generated OCaml
