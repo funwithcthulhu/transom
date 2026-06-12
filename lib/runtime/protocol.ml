@@ -134,6 +134,12 @@ let drop_trailing_cr line =
   if length > 0 && line.[length - 1] = '\r' then String.sub line 0 (length - 1)
   else line
 
+let drop_leading_utf8_bom line =
+  let length = String.length line in
+  if length >= 3 && line.[0] = '\239' && line.[1] = '\187' && line.[2] = '\191'
+  then String.sub line 3 (length - 3)
+  else line
+
 let take_lines parser chunk =
   let text = parser.pending ^ chunk in
   let length = String.length text in
@@ -142,7 +148,10 @@ let take_lines parser chunk =
       parser.pending <- String.sub text start (length - start);
       List.rev acc)
     else if text.[index] = '\n' then
-      let line = String.sub text start (index - start) |> drop_trailing_cr in
+      let line =
+        String.sub text start (index - start)
+        |> drop_trailing_cr |> drop_leading_utf8_bom
+      in
       loop (index + 1) (index + 1) (line :: acc)
     else loop start (index + 1) acc
   in
