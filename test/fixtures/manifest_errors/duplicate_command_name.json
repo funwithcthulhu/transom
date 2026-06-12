@@ -1,0 +1,19 @@
+{
+  "service_module": "Api_server",
+  "types_module": "Api_t",
+  "json_module": "Api_j",
+  "commands": [
+    {
+      "name": "ping",
+      "request": "ping_req",
+      "response": "ping_res",
+      "ts_response": "PingRes"
+    },
+    {
+      "name": "ping",
+      "request": "other_req",
+      "response": "other_res",
+      "ts_response": "OtherRes"
+    }
+  ]
+}

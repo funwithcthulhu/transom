@@ -1,0 +1,15 @@
+{
+  "service_module": "Api_server",
+  "types_module": "Api_t",
+  "json_module": "Api_j",
+  "typescript_types_module": "./api_types",
+  "commands": [
+    {
+      "name": "echo",
+      "request": "echo_req",
+      "response": "echo_res",
+      "ts_request": "EchoReq",
+      "ts_response": "EchoRes"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ type ok = { id : id; result : Yojson.Safe.t }
 type err = { id : id option; error : Error.t }
 type event = { id : id; event : Yojson.Safe.t }
 type outgoing = Out_ok of ok | Out_err of err | Out_event of event
+type ndjson_parser = { mutable pending : string }
 
 let assoc = function
   | `Assoc fields -> Ok fields
@@ -125,3 +126,58 @@ let outgoing_of_yojson json =
           | Error message, _ | _, Error message -> Error message)
       | Ok (`String kind) -> Error ("unknown outgoing frame kind: " ^ kind)
       | Ok _ -> Error "kind must be a string")
+
+let create_ndjson_parser () = { pending = "" }
+
+let drop_trailing_cr line =
+  let length = String.length line in
+  if length > 0 && line.[length - 1] = '\r' then String.sub line 0 (length - 1)
+  else line
+
+let take_lines parser chunk =
+  let text = parser.pending ^ chunk in
+  let length = String.length text in
+  let rec loop start index acc =
+    if index = length then (
+      parser.pending <- String.sub text start (length - start);
+      List.rev acc)
+    else if text.[index] = '\n' then
+      let line = String.sub text start (index - start) |> drop_trailing_cr in
+      loop (index + 1) (index + 1) (line :: acc)
+    else loop start (index + 1) acc
+  in
+  loop 0 0 []
+
+let frames_of_ndjson parser parse_frame chunk =
+  let rec loop acc = function
+    | [] -> Ok (List.rev acc)
+    | line :: rest when String.trim line = "" -> loop acc rest
+    | line :: rest -> (
+        match Yojson.Safe.from_string line with
+        | exception Yojson.Json_error message ->
+            Error ("invalid JSON frame: " ^ message)
+        | json -> (
+            match parse_frame json with
+            | Ok frame -> loop (frame :: acc) rest
+            | Error message -> Error message))
+  in
+  loop [] (take_lines parser chunk)
+
+let incoming_frames_of_ndjson parser chunk =
+  frames_of_ndjson parser incoming_of_yojson chunk
+
+let outgoing_frames_of_ndjson parser chunk =
+  frames_of_ndjson parser outgoing_of_yojson chunk
+
+let outgoing_id = function
+  | Out_ok { id; _ } | Out_event { id; _ } -> Some id
+  | Out_err { id; _ } -> id
+
+let expect_outgoing_id ~id frame =
+  match outgoing_id frame with
+  | Some actual when actual = id -> Ok ()
+  | Some actual ->
+      Error
+        (Printf.sprintf "response id mismatch: expected %d, got %d" id actual)
+  | None ->
+      Error (Printf.sprintf "response id mismatch: expected %d, got null" id)

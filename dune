@@ -21,15 +21,27 @@
   (templates/minimal/frontend/index.html
    as
    templates/minimal/frontend/index.html)
+  (templates/minimal/frontend/tsconfig.json
+   as
+   templates/minimal/frontend/tsconfig.json)
+  (templates/minimal/frontend/src/api_types.ts
+   as
+   templates/minimal/frontend/src/api_types.ts)
   (templates/minimal/frontend/src/main.ts
    as
    templates/minimal/frontend/src/main.ts)
   (templates/minimal/src-tauri/Cargo.toml
    as
    templates/minimal/src-tauri/Cargo.toml)
+  (templates/minimal/src-tauri/build.rs
+   as
+   templates/minimal/src-tauri/build.rs)
   (templates/minimal/src-tauri/tauri.conf.json
    as
    templates/minimal/src-tauri/tauri.conf.json)
+  (templates/minimal/src-tauri/icons/icon.ico
+   as
+   templates/minimal/src-tauri/icons/icon.ico)
   (templates/minimal/src-tauri/src/main.rs
    as
    templates/minimal/src-tauri/src/main.rs)))

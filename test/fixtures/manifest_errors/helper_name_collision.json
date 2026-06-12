@@ -1,0 +1,13 @@
+{
+  "service_module": "Api_server",
+  "types_module": "Api_t",
+  "json_module": "Api_j",
+  "commands": [
+    {
+      "name": "dispatch",
+      "request": "dispatch_req",
+      "response": "dispatch_res",
+      "ts_response": "DispatchRes"
+    }
+  ]
+}

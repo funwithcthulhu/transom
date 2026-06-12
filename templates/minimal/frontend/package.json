@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tauri dev",
-    "build": "tsc --noEmit"
+    "build": "tsc && node -e \"require('fs').copyFileSync('index.html','dist/index.html')\"",
+    "dev": "npm run build && cd .. && tauri dev --config src-tauri/tauri.conf.json"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.0.0",

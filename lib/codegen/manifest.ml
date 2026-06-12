@@ -1,21 +1,32 @@
+type command_name = string
+type ocaml_module = string
+type ocaml_type = string
+type ts_type = string
+type typescript_module = string
+
 type command = {
-  name : string;
-  request : string;
-  response : string;
-  event : string option;
-  ts_request : string;
-  ts_response : string;
-  ts_event : string option;
+  name : command_name;
+  request : ocaml_type;
+  response : ocaml_type;
+  event : ocaml_type option;
+  ts_request : ts_type;
+  ts_response : ts_type;
+  ts_event : ts_type option;
 }
 
 type t = {
-  service_module : string;
-  types_module : string;
-  json_module : string;
-  typescript_types_module : string;
+  service_module : ocaml_module;
+  types_module : ocaml_module;
+  json_module : ocaml_module;
+  typescript_types_module : typescript_module;
   commands : command list;
 }
 
+let command_name_to_string value = value
+let ocaml_module_to_string value = value
+let ocaml_type_to_string value = value
+let ts_type_to_string value = value
+let typescript_module_to_string value = value
 let error message = Error message
 
 let assoc path = function
@@ -32,6 +43,69 @@ let non_empty_string path = function
   | `String _ -> error (path ^ " must be non-empty")
   | _ -> error (path ^ " must be a string")
 
+let is_lower_start = function 'a' .. 'z' | '_' -> true | _ -> false
+let is_upper_start = function 'A' .. 'Z' -> true | _ -> false
+
+let is_identifier_start = function
+  | 'a' .. 'z' | 'A' .. 'Z' | '_' -> true
+  | _ -> false
+
+let is_identifier_char = function
+  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' -> true
+  | _ -> false
+
+let words text = String.split_on_char ' ' text
+
+let ocaml_keywords =
+  words
+    (String.concat " "
+       [
+         "and as assert begin class constraint do done downto else end";
+         "exception external false for fun function functor if in include";
+         "inherit initializer lazy let match method module mutable new nonrec";
+         "object of open or private rec sig struct then to true try type";
+         "val virtual when while with";
+       ])
+
+let ts_keywords =
+  words
+    (String.concat " "
+       [
+         "as async await break case catch class const continue debugger";
+         "default delete do else enum export extends false finally for from";
+         "function if import in instanceof let new null of return super switch";
+         "this throw true try type typeof var void while with";
+       ])
+
+let valid_identifier ~start value =
+  String.length value > 0
+  && value <> "_"
+  && start value.[0]
+  && String.for_all is_identifier_char value
+
+let valid_ocaml_value_name value =
+  valid_identifier ~start:is_lower_start value
+  && not (List.mem value ocaml_keywords)
+
+let valid_ocaml_type_name = valid_ocaml_value_name
+
+let valid_ts_identifier value =
+  valid_identifier ~start:is_identifier_start value
+  && not (List.mem value ts_keywords)
+
+let valid_command_name value =
+  valid_ocaml_value_name value && valid_ts_identifier value
+
+let valid_ocaml_module_name value = valid_identifier ~start:is_upper_start value
+
+let valid_ocaml_module_path value =
+  match String.split_on_char '.' value with
+  | [] -> false
+  | segments -> List.for_all valid_ocaml_module_name segments
+
+let validate_name path expected valid value =
+  if valid value then Ok () else error (path ^ " must be " ^ expected)
+
 let string_field path name fields =
   match field path name fields with
   | Error message -> error message
@@ -44,6 +118,46 @@ let optional_string_field path name fields =
       match non_empty_string (path ^ "." ^ name) value with
       | Ok value -> Ok (Some value)
       | Error message -> error message)
+
+let validate_optional path expected valid = function
+  | None -> Ok ()
+  | Some value -> validate_name path expected valid value
+
+let generated_helper_names = [ "bad_request"; "dispatch"; "run_stdio" ]
+
+let validate_command_helper_name path command =
+  if List.mem command.name generated_helper_names then
+    error (path ^ ".name collides with generated helper: " ^ command.name)
+  else Ok ()
+
+let validate_command path command =
+  match
+    ( validate_name (path ^ ".name") "a lowercase OCaml/TypeScript identifier"
+        valid_command_name command.name,
+      validate_command_helper_name path command,
+      validate_name (path ^ ".request") "an OCaml type identifier"
+        valid_ocaml_type_name command.request,
+      validate_name (path ^ ".response") "an OCaml type identifier"
+        valid_ocaml_type_name command.response,
+      validate_optional (path ^ ".event") "an OCaml type identifier"
+        valid_ocaml_type_name command.event,
+      validate_name (path ^ ".ts_request") "a TypeScript type identifier"
+        valid_ts_identifier command.ts_request,
+      validate_name (path ^ ".ts_response") "a TypeScript type identifier"
+        valid_ts_identifier command.ts_response,
+      validate_optional (path ^ ".ts_event") "a TypeScript type identifier"
+        valid_ts_identifier command.ts_event )
+  with
+  | Ok (), Ok (), Ok (), Ok (), Ok (), Ok (), Ok (), Ok () -> Ok command
+  | Error message, _, _, _, _, _, _, _
+  | _, Error message, _, _, _, _, _, _
+  | _, _, Error message, _, _, _, _, _
+  | _, _, _, Error message, _, _, _, _
+  | _, _, _, _, Error message, _, _, _
+  | _, _, _, _, _, Error message, _, _
+  | _, _, _, _, _, _, Error message, _
+  | _, _, _, _, _, _, _, Error message ->
+      error message
 
 let command_of_yojson index json =
   let path = Printf.sprintf "commands[%d]" index in
@@ -58,7 +172,7 @@ let command_of_yojson index json =
           required "response",
           optional "event",
           optional "ts_request",
-          optional "ts_response",
+          required "ts_response",
           optional "ts_event" )
       with
       | ( Ok name,
@@ -68,17 +182,19 @@ let command_of_yojson index json =
           Ok ts_request,
           Ok ts_response,
           Ok ts_event ) ->
-          Ok
+          let command =
             {
               name;
               request;
               response;
               event;
               ts_request = Option.value ts_request ~default:request;
-              ts_response = Option.value ts_response ~default:response;
+              ts_response;
               ts_event =
                 (match ts_event with Some _ -> ts_event | None -> event);
             }
+          in
+          validate_command path command
       | Error message, _, _, _, _, _, _
       | _, Error message, _, _, _, _, _
       | _, _, Error message, _, _, _, _
@@ -142,15 +258,27 @@ let of_yojson json =
           Ok typescript_types_module,
           Ok commands_json ) -> (
           match commands_of_yojson commands_json with
-          | Ok commands ->
-              Ok
-                {
-                  service_module;
-                  types_module;
-                  json_module;
-                  typescript_types_module;
-                  commands;
-                }
+          | Ok commands -> (
+              match
+                ( validate_name "manifest.service_module" "an OCaml module path"
+                    valid_ocaml_module_path service_module,
+                  validate_name "manifest.types_module" "an OCaml module path"
+                    valid_ocaml_module_path types_module,
+                  validate_name "manifest.json_module" "an OCaml module path"
+                    valid_ocaml_module_path json_module )
+              with
+              | Ok (), Ok (), Ok () ->
+                  Ok
+                    {
+                      service_module;
+                      types_module;
+                      json_module;
+                      typescript_types_module;
+                      commands;
+                    }
+              | Error message, _, _ | _, Error message, _ | _, _, Error message
+                ->
+                  error message)
           | Error message -> error message)
       | Error message, _, _, _, _
       | _, Error message, _, _, _

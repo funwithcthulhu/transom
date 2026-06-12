@@ -1,6 +1,6 @@
 open Cmdliner
 
-let version = "transom 0.1.0"
+let version = "transom 0.2.0"
 let print_lines lines = List.iter print_endline lines
 let result_error message = Error (`Msg message)
 
@@ -303,7 +303,7 @@ let new_cmd =
 
 let main_cmd =
   Cmd.group
-    (Cmd.info "transom" ~version:"0.1.0" ~doc:"Generate OCaml sidecar glue.")
+    (Cmd.info "transom" ~version:"0.2.0" ~doc:"Generate OCaml sidecar glue.")
     [ version_cmd; paths_cmd; doctor_cmd; check_cmd; gen_cmd; new_cmd ]
 
 let () = exit (Cmd.eval main_cmd)
