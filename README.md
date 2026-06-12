@@ -68,8 +68,8 @@ Expected output:
 
 ## Template Smoke Test
 
-The feature branch template includes a small Tauri command that calls one OCaml
-sidecar process. Generate the project and backend first:
+The minimal template includes a small Tauri command that calls one OCaml sidecar
+process. Generate the project and backend first:
 
 ```sh
 transom new hello-transom

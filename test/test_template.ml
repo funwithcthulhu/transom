@@ -22,8 +22,10 @@ let assert_contains path needle =
 
 let () =
   assert_contains "../templates/minimal/frontend/package.json"
-    "tauri dev --config ../src-tauri/tauri.conf.json";
-  assert_contains "../templates/minimal/frontend/index.html" "./dist/main.js";
+    "cd .. && tauri dev --config src-tauri/tauri.conf.json";
+  assert_contains "../templates/minimal/frontend/package.json"
+    "copyFileSync('index.html','dist/index.html')";
+  assert_contains "../templates/minimal/frontend/index.html" "./main.js";
   assert_contains "../templates/minimal/frontend/tsconfig.json"
     "\"outDir\": \"dist\"";
   assert_contains "../templates/minimal/frontend/src/main.ts" "./api_client.js";
@@ -42,6 +44,8 @@ let () =
   assert (Sys.file_exists "../templates/minimal/src-tauri/icons/icon.ico");
   assert_contains "../templates/minimal/src-tauri/tauri.conf.json"
     "\"withGlobalTauri\": true";
+  assert_contains "../templates/minimal/src-tauri/tauri.conf.json"
+    "\"frontendDist\": \"../frontend/dist\"";
   assert_contains "../templates/minimal/src-tauri/src/main.rs"
     "#[tauri::command]";
   assert_contains "../templates/minimal/src-tauri/src/main.rs" "fn transom_call";
