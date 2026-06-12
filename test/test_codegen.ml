@@ -176,6 +176,7 @@ let read_file path =
       let length = in_channel_length input in
       really_input_string input length)
 
+let normalize_newlines text = String.split_on_char '\r' text |> String.concat ""
 let is_digit = function '0' .. '9' -> true | _ -> false
 
 let contains_iso_date text =
@@ -251,9 +252,12 @@ let expect_golden_output () =
   in
   let expected =
     [
-      ("api_client.ts", read_file (golden_file "api_client.ts"));
-      ("api_server.ml", read_file (golden_file "api_server.ml"));
-      ("api_server.mli", read_file (golden_file "api_server.mli"));
+      ( "api_client.ts",
+        read_file (golden_file "api_client.ts") |> normalize_newlines );
+      ( "api_server.ml",
+        read_file (golden_file "api_server.ml") |> normalize_newlines );
+      ( "api_server.mli",
+        read_file (golden_file "api_server.mli") |> normalize_newlines );
     ]
   in
   assert (List.map fst generated = List.map fst expected);
